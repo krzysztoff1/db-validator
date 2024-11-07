@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require "tty-box"
+require "tty-spinner"
+
 module DbValidator
   class Reporter
     def initialize
@@ -14,7 +17,7 @@ module DbValidator
         if error.options[:in].present?
           "#{error.attribute} #{message} (allowed values: #{error.options[:in].join(', ')}, actual value: #{field_value.inspect})"
         else
-          "#{error.attribute} #{message} (actual value: #{field_value.inspect})"
+          "#{error.attribute} #{message} (actual value: #{format_value(field_value)})"
         end
       end
 
@@ -36,26 +39,68 @@ module DbValidator
 
     private
 
+    def format_value(value)
+      case value
+      when true, false
+      when Symbol
+        value.to_s
+      when String
+        "\"#{value}\""
+      when nil
+        "nil"
+      else
+        value
+      end
+    end
+
     def generate_text_report
       report = StringIO.new
-      report.puts "DbValidator Report"
-      report.puts "=================="
+      
+      title_box = TTY::Box.frame(
+        width: 50,
+        align: :center,
+        padding: [1, 2],
+        title: { top_left: "DbValidator" },
+        style: {
+          fg: :cyan,
+          border: {
+            fg: :cyan
+          }
+        }
+      ) do
+        "Database Validation Report"
+      end
+      
+      report.puts title_box
       report.puts
 
       if @invalid_records.empty?
-        report.puts "No invalid records found."
+        report.puts "No invalid records found.".colorize(:green)
       else
-        report.puts "Found invalid records:"
+        report.puts "Found #{@invalid_records.count} invalid records across #{@invalid_records.group_by { |r| r[:model] }.keys.count} models".colorize(:yellow)
         report.puts
 
         @invalid_records.group_by { |r| r[:model] }.each do |model, records|
-          report.puts "#{model}: #{records.count} invalid records"
+          report.puts "#{model}: #{records.count} invalid records".colorize(:red)
+          report.puts
+
           records.each do |record|
-            report.puts "  ID: #{record[:id]}"
+            record_obj = record[:model].constantize.find_by(id: record[:id])
+            next unless record_obj
+
+            info = ["ID: #{record[:id]}"]
+            info << "Created: #{record_obj.created_at.strftime('%Y-%m-%d %H:%M:%S')}" if record_obj.respond_to?(:created_at)
+            info << "Updated: #{record_obj.updated_at.strftime('%Y-%m-%d %H:%M:%S')}" if record_obj.respond_to?(:updated_at)
+            info << "Name: #{record_obj.name}" if record_obj.respond_to?(:name)
+            info << "Title: #{record_obj.title}" if record_obj.respond_to?(:title)
+            
+            report.puts "  #{info.join(' | ')}".colorize(:white)
             record[:errors].each do |error|
-              report.puts "    - #{error}"
+              report.puts "    ⚠️  #{error}".colorize(:white)
             end
+            report.puts
           end
+          
           report.puts
         end
       end

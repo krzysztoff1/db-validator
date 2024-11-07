@@ -3,7 +3,7 @@
 
 # DbValidator
 
-DbValidator helps identify invalid records in your Rails application that don't meet model validation requirements.
+DbValidator helps identify invalid records in your Rails application that don't meet model validation requirements. It finds records that became invalid after validation rule changes, and validates imported or manually edited data. You can use it to audit records before deploying new validations and catch any data that bypassed validation checks.
 
 ## Installation
 
@@ -25,11 +25,13 @@ $ bundle install
 
 The simplest way to run validation is using the provided rake task:
 
-#### Validate all models
+#### Validate models in interactive mode
 
 ```bash
 $ rake db_validator:validate
 ```
+
+This will start an interactive mode where you can select which models to validate and adjust other options.
 
 #### Validate specific models
 
@@ -47,6 +49,14 @@ $ rake db_validator:validate limit=1000
 
 ```bash
 $ rake db_validator:validate format=json
+```
+
+### Interactive Mode
+
+Running the validation task without specifying models will start an interactive mode:
+
+```bash
+$ rake db_validator:validate
 ```
 
 ### Ruby Code

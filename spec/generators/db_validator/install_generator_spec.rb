@@ -30,6 +30,6 @@ RSpec.describe DbValidator::Generators::InstallGenerator do
     content = File.read("#{destination_root}/config/initializers/db_validator.rb")
     expect(content).to match(/DbValidator\.configure do \|config\|/)
     expect(content).to match(/# config\.ignored_models/)
-    expect(content).to match(/# config\.batch_size = 1000/)
+    expect(content).to match(/# config\.batch_size = 100/)
   end
 end

@@ -2,7 +2,7 @@
 
 DbValidator.configure do |config|
   config.only_models = %w[Documents Users]
-  config.batch_size = 500
+  config.batch_size = 100
   config.limit = 500
   config.model_limits = {
     "documents" => 500,
