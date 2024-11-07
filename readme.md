@@ -16,12 +16,6 @@ Then execute:
 $ bundle install
 ```
 
-Or install it yourself:
-
-```bash
-$ gem install db_validator
-```
-
 ## Usage
 
 ### Rake Task
