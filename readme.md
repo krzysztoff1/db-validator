@@ -1,6 +1,6 @@
 # DbValidator
 
-DbValidator is a comprehensive solution for validating existing database records in Rails applications. It helps you identify records that don't meet your model's validation requirements, which can happen due to data migrations, changed validation rules, or direct database modifications.
+DbValidator helps identify invalid records in your Rails application that don't meet model validation requirements.
 
 ## Installation
 
@@ -20,46 +20,6 @@ Or install it yourself:
 
 ```bash
 $ gem install db_validator
-```
-
-## Setup
-
-Generate the initializer:
-
-```bash
-$ rails generate db_validator:install
-```
-
-This will create a configuration file at `config/initializers/db_validator.rb` where you can customize the validation behavior.
-
-## Configuration
-
-```ruby
-DbValidator.configure do |config|
-  # Specify specific models to validate (optional)
-  config.only_models = %w[User Post]
-
-  # Ignore specific models from validation (optional)
-  config.ignored_models = ["AdminUser"]
-
-  # Ignore specific attributes for specific models (optional)
-  config.ignored_attributes = {
-    "User" => ["encrypted_password", "reset_password_token"],
-    "Post" => ["cached_votes"]
-  }
-
-  # Set the batch size for processing records (default: 1000)
-  config.batch_size = 1000
-
-  # Set the report format (:text or :json)
-  config.report_format = :text
-
-  # Enable automatic fixing of simple validation errors
-  config.auto_fix = false
-
-  # Limit the number of records to validate per model
-  config.limit = nil
-end
 ```
 
 ## Usage
