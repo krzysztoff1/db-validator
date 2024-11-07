@@ -5,6 +5,8 @@ require "colorize"
 
 module DbValidator
   class Validator
+    attr_reader :reporter
+
     def initialize(options = {})
       @options = options
       @reporter = Reporter.new

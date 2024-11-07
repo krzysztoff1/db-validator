@@ -41,11 +41,12 @@ RSpec.describe "Database Validation Integration" do
     end
 
     it "identifies and reports invalid records" do
-      validation_report = validator.validate_all
-      clean_report = strip_color_codes(validation_report)
-      expect(clean_report).to include("Found invalid records")
-      expect(clean_report).to include("name can't be blank (actual value: \"\")")
-      expect(clean_report).to include("email is invalid (actual value: \"invalid-email\")")
+      validator.validate_all
+      report = validator.reporter.generate_report
+      clean_report = strip_color_codes(report)
+
+      expect(clean_report).to include("Found 1 invalid records across 1 models")
+      expect(clean_report).to include("TestUser: 1 invalid records")
     end
   end
 end

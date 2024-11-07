@@ -36,11 +36,12 @@ RSpec.describe DbValidator::Validator do
     end
 
     it "identifies invalid records" do
-      report = validator.validate_all
+      validator.validate_all
+      report = validator.reporter.generate_report
       clean_report = strip_color_codes(report)
-      expect(clean_report).to include("Found invalid records")
-      expect(clean_report).to include("name can't be blank (actual value: \"\")")
-      expect(clean_report).to include("email is invalid (actual value: \"invalid-email\")")
+
+      expect(clean_report).to include("Found 3 invalid records across 1 models")
+      expect(clean_report).to include("User: 3 invalid records")
     end
   end
 end

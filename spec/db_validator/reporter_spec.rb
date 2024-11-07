@@ -34,10 +34,10 @@ RSpec.describe DbValidator::Reporter do
       report = reporter.generate_report
       clean_report = strip_color_codes(report)
 
-      # Update expectations to match the actual format
+      # Update expectations to match the new format
       expect(clean_report).to include("Product: 1 invalid records")
-      expect(clean_report).to include("- name can't be blank (actual value: \"\")")
-      expect(clean_report).to include("- product_type is not included in the list (actual value: \"unknown\")")
+      expect(clean_report).to include("⚠️  name can't be blank (actual value: \"\")")
+      expect(clean_report).to include("⚠️  product_type is not included in the list (actual value: \"unknown\")")
     end
   end
 
@@ -70,9 +70,9 @@ RSpec.describe DbValidator::Reporter do
         report = reporter.generate_report
         clean_report = strip_color_codes(report)
 
-        expect(clean_report).to include("DbValidator Report")
+        expect(clean_report).to include("Database Validation Report")
         expect(clean_report).to include("User: 1 invalid records")
-        expect(clean_report).to include("name can't be blank (actual value: \"\")")
+        expect(clean_report).to include("⚠️  name can't be blank (actual value: \"\")")
       end
     end
 
