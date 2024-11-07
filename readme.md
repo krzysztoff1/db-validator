@@ -26,6 +26,7 @@ $ bundle install
 The simplest way to run validation is using the provided rake task:
 
 #### Validate models in interactive mode
+<img width="798" alt="Screenshot 2024-11-07 at 21 50 57" src="https://github.com/user-attachments/assets/33fbdb8b-b8ec-4284-9313-c1eeaf2eab2d">
 
 ```bash
 $ rake db_validator:validate
