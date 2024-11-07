@@ -18,7 +18,4 @@ DbValidator.configure do |config|
 
   # Set the report format (:text or :json)
   # config.report_format = :text
-
-  # Enable automatic fixing of simple validation errors
-  # config.auto_fix = false
 end

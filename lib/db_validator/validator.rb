@@ -8,7 +8,6 @@ module DbValidator
     def initialize(options = {})
       @options = options
       @reporter = Reporter.new
-      @fixer = Fixer.new if DbValidator.configuration.auto_fix
     end
 
     def validate_all
@@ -80,7 +79,6 @@ module DbValidator
       return if record.valid?
 
       @reporter.add_invalid_record(record)
-      @fixer&.attempt_fix(record)
     end
   end
 end

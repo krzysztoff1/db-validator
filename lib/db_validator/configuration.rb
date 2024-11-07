@@ -2,7 +2,7 @@
 
 module DbValidator
   class Configuration
-    attr_accessor :only_models, :ignored_models, :ignored_attributes, :batch_size, :report_format, :auto_fix, :limit
+    attr_accessor :only_models, :ignored_models, :ignored_attributes, :batch_size, :report_format, :limit
 
     def initialize
       @only_models = []
@@ -10,7 +10,6 @@ module DbValidator
       @ignored_attributes = {}
       @batch_size = 1000
       @report_format = :text
-      @auto_fix = false
       @limit = nil
     end
 

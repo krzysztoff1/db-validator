@@ -5,7 +5,6 @@ require "db_validator/version"
 require "db_validator/configuration"
 require "db_validator/validator"
 require "db_validator/reporter"
-require "db_validator/fixer"
 
 module DbValidator
   class Error < StandardError; end
