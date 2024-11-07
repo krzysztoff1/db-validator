@@ -18,22 +18,20 @@ RSpec.describe DbValidator::Validator do
     end
 
     after(:all) do
-      begin
-        User.delete_all if Object.const_defined?(:User)
-      ensure
-        CustomHelpers.remove_test_model(:User)
-        ActiveRecord::Base.connection.drop_table(:users) if ActiveRecord::Base.connection.table_exists?(:users)
-      end
+      User.delete_all if Object.const_defined?(:User)
+    ensure
+      CustomHelpers.remove_test_model(:User)
+      ActiveRecord::Base.connection.drop_table(:users) if ActiveRecord::Base.connection.table_exists?(:users)
     end
 
-    before(:each) do
+    before do
       User.create!(name: "Valid User", email: "valid@example.com")
       # Create invalid record by bypassing validations
       invalid_user = User.new(name: "", email: "invalid-email")
       invalid_user.save(validate: false)
     end
 
-    after(:each) do
+    after do
       User.delete_all if Object.const_defined?(:User)
     end
 

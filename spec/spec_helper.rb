@@ -4,6 +4,9 @@ require "bundler/setup"
 require "rails"
 require "active_record"
 require "database_cleaner-active_record"
+require "simplecov"
+
+SimpleCov.start
 
 # Create a minimal Rails application for testing
 class TestApp < Rails::Application

@@ -11,5 +11,6 @@ group :development do
   gem "rubocop", "~> 1.0"
   gem "rubocop-rails", "~> 2.0"
   gem "rubocop-rspec", "~> 2.0"
+  gem "simplecov", require: false, group: :test
   gem "sqlite3"
 end

@@ -10,7 +10,7 @@ module DbValidator
       enhanced_errors = record.errors.map do |error|
         field_value = record.send(error.attribute)
         message = error.message
-        
+
         if error.options[:in].present?
           "#{error.attribute} #{message} (allowed values: #{error.options[:in].join(', ')}, actual value: #{field_value.inspect})"
         else

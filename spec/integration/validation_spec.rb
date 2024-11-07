@@ -21,12 +21,10 @@ RSpec.describe "Database Validation Integration" do
   end
 
   after(:all) do
-    begin
-      TestUser.delete_all if Object.const_defined?(:TestUser)
-    ensure
-      Object.send(:remove_const, :TestUser) if Object.const_defined?(:TestUser)
-      ActiveRecord::Base.connection.drop_table(:test_users) if ActiveRecord::Base.connection.table_exists?(:test_users)
-    end
+    TestUser.delete_all if Object.const_defined?(:TestUser)
+  ensure
+    Object.send(:remove_const, :TestUser) if Object.const_defined?(:TestUser)
+    ActiveRecord::Base.connection.drop_table(:test_users) if ActiveRecord::Base.connection.table_exists?(:test_users)
   end
 
   let(:validator) { DbValidator::Validator.new }

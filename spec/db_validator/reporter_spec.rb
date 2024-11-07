@@ -33,7 +33,7 @@ RSpec.describe DbValidator::Reporter do
       reporter.add_invalid_record(@invalid_product)
       report = reporter.generate_report
       clean_report = strip_color_codes(report)
-      
+
       # Update expectations to match the actual format
       expect(clean_report).to include("Product: 1 invalid records")
       expect(clean_report).to include("- name can't be blank (actual value: \"\")")

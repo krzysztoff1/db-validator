@@ -32,7 +32,7 @@ module CustomHelpers
   def setup_test_table(name, &block)
     table_name = name.to_s.downcase.pluralize
     ActiveRecord::Base.connection.drop_table(table_name) if ActiveRecord::Base.connection.table_exists?(table_name)
-    
+
     ActiveRecord::Schema.define do
       create_table table_name, force: true do |t|
         block.call(t)
@@ -44,9 +44,9 @@ end
 RSpec.configure do |config|
   config.include CustomHelpers
 
-  config.after(:each) do
+  config.after do
     # Clean up any test models after each example
-    [:User, :Product, :TestUser].each do |model_name|
+    %i[User Product TestUser].each do |model_name|
       CustomHelpers.remove_test_model(model_name)
     end
   end
