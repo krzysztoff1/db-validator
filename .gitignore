@@ -1,0 +1,71 @@
+# Ruby/Rails specific
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/spec/examples.txt
+/test/tmp/
+/test/version_tmp/
+/tmp/
+.rspec_status
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Documentation cache and generated files
+/.yardoc/
+/_yardoc/
+/doc/
+/rdoc/
+
+# Dependencies
+/.bundle/
+/vendor/bundle
+/lib/bundler/man/
+
+# Logs
+/log/*
+!/log/.keep
+*.log
+
+# Temporary files
+.byebug_history
+.dat*
+.repl_history
+*.bridgesupport
+build-iPhoneOS/
+build-iPhoneSimulator/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Database
+*.sqlite3
+*.sqlite3-journal
+
+# Node (if using webpacker or other JS tools)
+node_modules/
+/public/packs
+/public/packs-test
+/public/assets
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity
