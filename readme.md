@@ -1,5 +1,5 @@
 [![Gem Version](https://badge.fury.io/rb/db_validator.svg?icon=si%3Arubygems)](https://badge.fury.io/rb/db_validator)
-[![RSpec Tests](https://github.com/OWNER/REPO/actions/workflows/rspec.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/rspec.yml)
+[![RSpec Tests](https://github.com/krzysztoff1/db-validator/actions/workflows/rspec.yml/badge.svg)](https://github.com/krzysztoff1/db-validator/actions/workflows/rspec.yml)
 
 # DbValidator
 
