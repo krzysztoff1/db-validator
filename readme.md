@@ -26,6 +26,7 @@ $ bundle install
 The simplest way to run validation is using the provided rake task:
 
 #### Validate models in interactive mode
+
 <img width="798" alt="Screenshot 2024-11-07 at 21 50 57" src="https://github.com/user-attachments/assets/33fbdb8b-b8ec-4284-9313-c1eeaf2eab2d">
 
 ```bash
@@ -52,12 +53,37 @@ $ rake db_validator:validate limit=1000
 $ rake db_validator:validate format=json
 ```
 
-### Interactive Mode
+### Test Mode
 
-Running the validation task without specifying models will start an interactive mode:
+You can test new validation rules before applying them to your models:
 
 ```bash
-$ rake db_validator:validate
+$ rake db_validator:test model=User rule='validates :name, presence: true'
+```
+
+#### Testing Email Format Validation
+
+Here's an example of testing email format validation rules:
+
+```bash
+# Testing invalid email format (without @)
+$ rake db_validator:test model=User rule='validates :email, format: { without: /@/, message: "must contain @" }' show_records=false
+
+Found 100 records that would become invalid out of 100 total records.
+
+# Testing valid email format (with @)
+$ rake db_validator:test model=User rule='validates :email, format: { with: /@/, message: "must contain @" }' show_records=false
+
+No invalid records found.
+```
+
+#### Error Handling
+
+Trying to test a validation rule for a non-existent attribute will return an error:
+
+```
+❌ Error: Attribute 'i_dont_exist' does not exist for model 'User'
+Available columns: id, email, created_at, updated_at, name
 ```
 
 ### Ruby Code

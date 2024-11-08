@@ -7,31 +7,52 @@ module DbValidator
     attr_reader :reporter
 
     def initialize(options = {})
-      @options = options
-      @reporter = Reporter.new
       configure_from_options(options)
+      @reporter = Reporter.new
     end
 
     def validate_all
-      Rails.application.eager_load! if defined?(Rails)
-
-      models = find_all_models
-      models_to_validate = models.select { |model| should_validate_model?(model) }
-      total_models = models_to_validate.size
-
-      if models_to_validate.empty?
-        puts "No models selected for validation."
-        return @reporter.generate_report
-      end
-
+      models = get_models_to_validate
+      total_count = 0
       invalid_count = 0
-      models_to_validate.each_with_index do |model, index|
-        puts "Validating model #{index + 1}/#{total_models}: #{model.name}"
-        invalid_count += validate_model(model)
+
+      models.each do |model|
+        model_count = validate_model(model)
+        invalid_count += model_count if model_count
       end
 
       if invalid_count.zero?
-        puts "\nNo validation errors found! All records are valid."
+        puts "\nValidation passed! All records are valid."
+      else
+        total_records = models.sum { |model| model.count }
+        puts "\nFound #{invalid_count} invalid records out of #{total_records} total records."
+      end
+
+      @reporter.generate_report
+    end
+
+    def validate_test_model(model_name)
+      model = model_name.constantize
+      scope = model.all
+      scope = scope.limit(DbValidator.configuration.limit) if DbValidator.configuration.limit
+      
+      total_count = scope.count
+      progress_bar = create_progress_bar("Testing #{model.name}", total_count)
+      invalid_count = 0
+
+      begin
+        scope.find_each(batch_size: DbValidator.configuration.batch_size) do |record|
+          invalid_count += 1 unless validate_record(record)
+          progress_bar.increment
+        end
+      rescue StandardError => e
+        puts "Error validating #{model.name}: #{e.message}"
+      end
+
+      if invalid_count.zero?
+        puts "\nValidation rule passed! All records would be valid."
+      else
+        puts "\nFound #{invalid_count} records that would become invalid out of #{total_count} total records."
       end
 
       @reporter.generate_report
@@ -113,6 +134,11 @@ module DbValidator
 
       @reporter.add_invalid_record(record)
       false
+    end
+
+    def get_models_to_validate
+      models = find_all_models
+      models.select { |model| should_validate_model?(model) }
     end
   end
 end

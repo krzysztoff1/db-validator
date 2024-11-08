@@ -15,4 +15,7 @@ DbValidator.configure do |config|
 
   # Set the report format (:text or :json)
   # config.report_format = :text
+
+  # Show detailed record information in reports
+  # config.show_records = true
 end

@@ -137,6 +137,8 @@ module DbValidator
 
       options[:format] = @prompt.select("Select report format:", %w[text json], default: "text")
 
+      options[:show_records] = @prompt.yes?("Show failing records in the report?", default: true)
+
       options
     end
 
