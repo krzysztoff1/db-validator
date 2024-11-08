@@ -13,9 +13,6 @@ DbValidator.configure do |config|
   #   "Post" => ["cached_votes"]
   # }
 
-  # Set the batch size for processing records (default: 1000)
-  # config.batch_size = 100
-
   # Set the report format (:text or :json)
   # config.report_format = :text
 end

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "ruby-progressbar"
-require "colorize"
 
 module DbValidator
   class Validator
@@ -21,13 +20,18 @@ module DbValidator
       total_models = models_to_validate.size
 
       if models_to_validate.empty?
-        Rails.logger.debug "No models selected for validation.".colorize(:yellow)
+        puts "No models selected for validation."
         return @reporter.generate_report
       end
 
+      invalid_count = 0
       models_to_validate.each_with_index do |model, index|
-        Rails.logger.debug "Validating model #{index + 1}/#{total_models}: #{model.name}".colorize(:cyan)
-        validate_model(model)
+        puts "Validating model #{index + 1}/#{total_models}: #{model.name}"
+        invalid_count += validate_model(model)
+      end
+
+      if invalid_count.zero?
+        puts "\nNo validation errors found! All records are valid."
       end
 
       @reporter.generate_report
@@ -38,10 +42,8 @@ module DbValidator
     def configure_from_options(options)
       return unless options.is_a?(Hash)
 
-      if options[:only_models]
-        DbValidator.configuration.only_models = Array(options[:only_models])
-      end
-      
+      DbValidator.configuration.only_models = Array(options[:only_models]) if options[:only_models]
+
       DbValidator.configuration.limit = options[:limit] if options[:limit]
       DbValidator.configuration.batch_size = options[:batch_size] if options[:batch_size]
       DbValidator.configuration.report_format = options[:report_format] if options[:report_format]
@@ -59,37 +61,42 @@ module DbValidator
 
       config = DbValidator.configuration
       model_name = model.name.downcase
-      
+
       if config.only_models.any?
-        return config.only_models.map(&:downcase).include?(model_name)
+        return config.only_models.map(&:downcase).include?(model_name) ||
+               config.only_models.map(&:downcase).include?(model_name.singularize) ||
+               config.only_models.map(&:downcase).include?(model_name.pluralize)
       end
 
-      !config.ignored_models.map(&:downcase).include?(model_name)
+      config.ignored_models.map(&:downcase).exclude?(model_name)
     end
 
     def validate_model(model)
       config = DbValidator.configuration
-      batch_size = config.batch_size || 1000
+      batch_size = config.batch_size || 100
       limit = config.limit
 
       scope = model.all
       scope = scope.limit(limit) if limit
 
       total_count = scope.count
-      return if total_count.zero?
+      return 0 if total_count.zero?
 
       progress_bar = create_progress_bar(model.name, total_count)
+      invalid_count = 0
 
       begin
         scope.find_in_batches(batch_size: batch_size) do |batch|
           batch.each do |record|
-            validate_record(record)
+            invalid_count += 1 unless validate_record(record)
             progress_bar.increment
           end
         end
       rescue StandardError => e
-        Rails.logger.debug "Error validating #{model.name}: #{e.message}".colorize(:red)
+        puts "Error validating #{model.name}: #{e.message}"
       end
+
+      invalid_count
     end
 
     def create_progress_bar(model_name, total)
@@ -102,8 +109,10 @@ module DbValidator
     end
 
     def validate_record(record)
-      return if record.valid?
+      return true if record.valid?
+
       @reporter.add_invalid_record(record)
+      false
     end
   end
 end
