@@ -13,7 +13,6 @@ module DbValidator
 
     def validate_all
       models = get_models_to_validate
-      total_count = 0
       invalid_count = 0
 
       models.each do |model|
@@ -22,10 +21,13 @@ module DbValidator
       end
 
       if invalid_count.zero?
-        puts "\nValidation passed! All records are valid."
+        Rails.logger.debug "\nValidation passed! All records are valid."
       else
-        total_records = models.sum { |model| model.count }
-        puts "\nFound #{invalid_count} invalid records out of #{total_records} total records."
+        total_records = models.sum(&:count)
+        is_plural = invalid_count > 1
+        Rails.logger.debug do
+          "\nFound #{invalid_count} invalid #{is_plural ? 'records' : 'record'} out of #{total_records} total #{is_plural ? 'records' : 'record'}."
+        end
       end
 
       @reporter.generate_report
@@ -35,7 +37,7 @@ module DbValidator
       model = model_name.constantize
       scope = model.all
       scope = scope.limit(DbValidator.configuration.limit) if DbValidator.configuration.limit
-      
+
       total_count = scope.count
       progress_bar = create_progress_bar("Testing #{model.name}", total_count)
       invalid_count = 0
@@ -46,13 +48,15 @@ module DbValidator
           progress_bar.increment
         end
       rescue StandardError => e
-        puts "Error validating #{model.name}: #{e.message}"
+        Rails.logger.debug { "Error validating #{model.name}: #{e.message}" }
       end
 
       if invalid_count.zero?
-        puts "\nValidation rule passed! All records would be valid."
+        Rails.logger.debug "\nValidation rule passed! All records would be valid."
       else
-        puts "\nFound #{invalid_count} records that would become invalid out of #{total_count} total records."
+        Rails.logger.debug do
+          "\nFound #{invalid_count} records that would become invalid out of #{total_count} total records."
+        end
       end
 
       @reporter.generate_report
@@ -114,7 +118,7 @@ module DbValidator
           end
         end
       rescue StandardError => e
-        puts "Error validating #{model.name}: #{e.message}"
+        Rails.logger.debug { "Error validating #{model.name}: #{e.message}" }
       end
 
       invalid_count

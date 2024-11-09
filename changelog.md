@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add test mode - `rake db_validator:test`
 
+### Fixed
+- Skip validation of HABTM (Has And Belongs To Many) join tables
+
 ## [0.2.0] - 2024-11-07
 
 ### Added

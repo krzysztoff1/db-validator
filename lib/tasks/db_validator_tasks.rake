@@ -50,12 +50,12 @@ namespace :db_validator do
     end
 
     model_name = ENV["model"].classify
-    validation_rule = ENV["rule"]
-    
+    validation_rule = ENV.fetch("rule", nil)
+
     # Configure options
     DbValidator.configuration.show_records = ENV["show_records"] != "false" if ENV["show_records"].present?
     DbValidator.configuration.limit = ENV["limit"].to_i if ENV["limit"].present?
-    
+
     begin
       base_model = model_name.constantize
       # Extract attribute name from validation rule
@@ -80,7 +80,7 @@ namespace :db_validator do
       validator = DbValidator::Validator.new
       report = validator.validate_test_model("Temporary#{model_name}")
       puts "\n#{report}"
-    rescue NameError => e
+    rescue NameError
       puts "\n❌ Error: Model '#{model_name}' not found"
       exit 1
     rescue SyntaxError => e

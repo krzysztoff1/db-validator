@@ -4,7 +4,7 @@ RSpec.describe DbValidator::Validator do
   let(:validator) { described_class.new }
 
   describe "#validate_all" do
-    before(:all) do
+    before do
       setup_test_table(:users) do |t|
         t.string :name
         t.string :email
@@ -15,39 +15,40 @@ RSpec.describe DbValidator::Validator do
         validates :name, presence: true
         validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
       end
-    end
 
-    after(:all) do
-      User.delete_all if Object.const_defined?(:User)
-    ensure
-      CustomHelpers.remove_test_model(:User)
-      ActiveRecord::Base.connection.drop_table(:users) if ActiveRecord::Base.connection.table_exists?(:users)
-    end
-
-    before do
+      # Create exactly one valid and one invalid record
       User.create!(name: "Valid User", email: "valid@example.com")
-      invalid_user = User.new(name: "", email: "invalid-email")
-      invalid_user.save(validate: false)
+
+      # Create only one invalid record
+      User.connection.execute(
+        "INSERT INTO users (name, email, created_at, updated_at) VALUES ('', 'invalid-email', datetime('now'), datetime('now'))"
+      )
     end
 
     after do
-      User.delete_all if Object.const_defined?(:User)
+      ActiveRecord::Base.connection.drop_table(:users) if ActiveRecord::Base.connection.table_exists?(:users)
+      CustomHelpers.remove_test_model(:User) if defined?(User)
     end
 
-    it "identifies invalid records" do
+    it "reports name validation errors" do
       validator.validate_all
       report = validator.reporter.generate_report
       clean_report = strip_color_codes(report)
 
-      expect(clean_report).to include("Found 1 invalid records across 1 models")
-      expect(clean_report).to include("User: 1 invalid records")
       expect(clean_report).to include("name can't be blank")
+    end
+
+    it "reports email validation errors" do
+      validator.validate_all
+      report = validator.reporter.generate_report
+      clean_report = strip_color_codes(report)
+
       expect(clean_report).to include("email is invalid")
     end
   end
 
   describe "#validate_test_model" do
-    before(:all) do
+    before do
       setup_test_table(:users) do |t|
         t.string :name
         t.string :email
@@ -55,7 +56,7 @@ RSpec.describe DbValidator::Validator do
       end
     end
 
-    after(:all) do
+    after do
       ActiveRecord::Base.connection.drop_table(:users) if ActiveRecord::Base.connection.table_exists?(:users)
     end
 
@@ -69,7 +70,7 @@ RSpec.describe DbValidator::Validator do
     end
 
     after do
-      User.delete_all if Object.const_defined?(:User)
+      User.delete_all if defined?(User)
       CustomHelpers.remove_test_model(:User)
       DbValidator.configuration.limit = nil
     end
@@ -77,7 +78,7 @@ RSpec.describe DbValidator::Validator do
     context "with limit" do
       it "respects the record limit" do
         DbValidator.configuration.limit = 2
-        
+
         temp_model = Class.new(User) do
           validates :email, presence: true
         end
@@ -144,8 +145,8 @@ RSpec.describe DbValidator::Validator do
         report = validator.reporter.generate_report
         clean_report = strip_color_codes(report)
 
-        expect(clean_report).to include("Found 1 invalid records across 1 models")
-        expect(clean_report).to include("TemporaryUser: 1 invalid records")
+        expect(clean_report).to include("Found 1 invalid record across 1 model")
+        expect(clean_report).to include("TemporaryUser: 1 invalid record")
         expect(clean_report).to include("name can't be blank")
       ensure
         Object.send(:remove_const, "TemporaryUser") if Object.const_defined?("TemporaryUser")

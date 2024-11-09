@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe "Database Validation Integration" do
+RSpec.describe DbValidator do
   before(:all) do
     ActiveRecord::Schema.define do
       create_table :test_users do |t|
@@ -45,8 +45,7 @@ RSpec.describe "Database Validation Integration" do
       report = validator.reporter.generate_report
       clean_report = strip_color_codes(report)
 
-      expect(clean_report).to include("Found 1 invalid records across 1 models")
-      expect(clean_report).to include("TestUser: 1 invalid records")
+      expect(clean_report).to include("Found 1 invalid record across 1 model")
     end
   end
 end

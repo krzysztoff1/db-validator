@@ -42,16 +42,18 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  # Database Cleaner configuration
+  # Configure DatabaseCleaner
   config.before(:suite) do
-    DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with(:truncation)
+    DatabaseCleaner.strategy = :transaction
   end
 
-  config.around do |example|
-    DatabaseCleaner.cleaning do
-      example.run
-    end
+  config.before do
+    DatabaseCleaner.start
+  end
+
+  config.after do
+    DatabaseCleaner.clean
   end
 end
 

@@ -79,7 +79,7 @@ module DbValidator
       configure_validator(@options[:only_models], @options)
       validator = DbValidator::Validator.new
       report = validator.validate_all
-      puts "\n#{report}"
+      Rails.logger.debug { "\n#{report}" }
     end
 
     def interactive_mode
@@ -91,13 +91,13 @@ module DbValidator
       end
 
       available_models = ActiveRecord::Base.descendants
-                                         .reject(&:abstract_class?)
-                                         .select(&:table_exists?)
-                                         .map(&:name)
-                                         .sort
+                                           .reject(&:abstract_class?)
+                                           .select(&:table_exists?)
+                                           .map(&:name)
+                                           .sort
 
       if available_models.empty?
-        puts "No models found in the application."
+        Rails.logger.debug "No models found in the application."
         exit 1
       end
 
@@ -107,13 +107,13 @@ module DbValidator
       configure_validator(selected_models, options)
       validator = DbValidator::Validator.new
       report = validator.validate_all
-      puts "\n#{report}"
+      Rails.logger.debug { "\n#{report}" }
     end
 
     def load_rails
       require File.expand_path("config/environment", Dir.pwd)
     rescue LoadError
-      puts "Error: Rails application not found. Please run this command from your Rails application root."
+      Rails.logger.debug "Error: Rails application not found. Please run this command from your Rails application root."
       exit 1
     end
 
@@ -155,7 +155,7 @@ module DbValidator
           }
         }
       )
-      puts title
+      Rails.logger.debug title
     end
   end
 end

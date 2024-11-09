@@ -77,7 +77,10 @@ module DbValidator
       if @invalid_records.empty?
         report.puts "No invalid records found."
       else
-        report.puts "Found #{@invalid_records.count} invalid records across #{@invalid_records.group_by { |r| r[:model] }.keys.count} models"
+        is_plural = @invalid_records.count > 1
+        report.puts "Found #{@invalid_records.count} invalid #{is_plural ? 'records' : 'record'} across #{@invalid_records.group_by do |r|
+          r[:model]
+        end.keys.count} #{is_plural ? 'models' : 'model'}"
         report.puts
 
         if DbValidator.configuration.show_records
