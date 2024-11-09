@@ -129,17 +129,26 @@ ID: 5
 
 ### JSON Format
 
+The JSON report is saved to a file in the `db_validator_reports` directory.
+
 ```json
-[
-  {
-    "model": "User",
-    "id": 1,
-    "errors": ["email is invalid (actual value: \"invalid-email\")"]
-  },
-  {
-    "model": "User",
-    "id": 2,
-    "errors": ["name can't be blank (actual value: \"\")"]
+{
+  "User": {
+    "error_count": 2,
+    "records": [
+      {
+        "id": 1,
+        "errors": [
+          "email is invalid (actual value: \"invalid-email\")"
+        ]
+      },
+      {
+        "id": 2,
+        "errors": [
+          "name can't be blank (actual value: \"\")"
+        ]
+      }
+    ]
   }
-]
+}
 ```

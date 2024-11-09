@@ -79,14 +79,51 @@ RSpec.describe DbValidator::Reporter do
     context "with json format" do
       before do
         allow(DbValidator.configuration).to receive(:report_format).and_return(:json)
+
+        setup_test_table(:skills) do |t|
+          t.string :name
+          t.timestamps
+        end
+
+        create_test_model(:Skill) do
+          validates :name, presence: true
+        end
+
+        # Create multiple invalid skills
+        @invalid_skills = [
+          Skill.new(name: ""),
+          Skill.new(name: nil),
+          Skill.new(name: "   ")
+        ]
+
+        @invalid_skills.each do |skill|
+          skill.save(validate: false)
+          skill.valid?
+          reporter.add_invalid_record(skill)
+        end
       end
 
-      it "generates a JSON report" do
+      after do
+        Skill.delete_all
+        CustomHelpers.remove_test_model(:Skill)
+        ActiveRecord::Base.connection.drop_table(:skills)
+      end
+
+      it "generates a JSON report with grouped records and error counts" do
         report = reporter.generate_report
         parsed_report = JSON.parse(report)
-        expect(parsed_report).to be_an(Array)
-        expect(parsed_report.first["model"]).to eq("User")
-        expect(parsed_report.first["errors"]).to include("name can't be blank (actual value: \"\")")
+
+        expect(parsed_report).to be_a(Hash)
+        expect(parsed_report["Skill"]).to be_a(Hash)
+        expect(parsed_report["Skill"]["error_count"]).to eq(3)
+        expect(parsed_report["Skill"]["records"]).to be_an(Array)
+        expect(parsed_report["Skill"]["records"].length).to eq(3)
+
+        first_record = parsed_report["Skill"]["records"].first
+        expect(first_record).to include(
+          "id" => kind_of(Integer),
+          "errors" => include(match(/name can't be blank/))
+        )
       end
     end
   end

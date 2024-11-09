@@ -2,6 +2,7 @@
 
 require "tty-box"
 require "tty-spinner"
+require "db_validator/formatters/json_formatter"
 
 module DbValidator
   class Reporter
@@ -31,7 +32,7 @@ module DbValidator
     def generate_report
       case DbValidator.configuration.report_format
       when :json
-        generate_json_report
+        Formatters::JsonFormatter.new(@invalid_records).format
       else
         generate_text_report
       end
@@ -119,10 +120,6 @@ module DbValidator
       end
 
       report.string
-    end
-
-    def generate_json_report
-      @invalid_records.to_json
     end
   end
 end

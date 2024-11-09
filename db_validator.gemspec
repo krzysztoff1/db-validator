@@ -16,7 +16,6 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = ">= 2.7.0"
 
   spec.metadata = {
-    "homepage_uri" => "https://github.com/krzysztoff1/db-validator/",
     "source_code_uri" => "https://github.com/krzysztoff1/db-validator/",
     "documentation_uri" => "https://github.com/krzysztoff1/db-validator/blob/main/README.md",
     "changelog_uri" => "https://github.com/krzysztoff1/db-validator/blob/main/changelog.md",
