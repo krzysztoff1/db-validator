@@ -67,12 +67,12 @@ Here's an example of testing email format validation rules:
 
 ```bash
 # Testing invalid email format (without @)
-$ rake db_validator:test model=User rule='validates :email, format: { without: /@/, message: "must contain @" }' show_records=false
+$ rake db_validator:test model=User rule='validates :email, format: { without: /@/, message: "must contain @" }'
 
 Found 100 records that would become invalid out of 100 total records.
 
 # Testing valid email format (with @)
-$ rake db_validator:test model=User rule='validates :email, format: { with: /@/, message: "must contain @" }' show_records=false
+$ rake db_validator:test model=User rule='validates :email, format: { with: /@/, message: "must contain @" }'
 
 No invalid records found.
 ```
