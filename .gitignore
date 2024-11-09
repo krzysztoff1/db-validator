@@ -6,6 +6,8 @@
 /InstalledFiles
 /pkg/
 /spec/reports/
+/spec/log/
+/db_validator_reports/
 /spec/examples.txt
 /test/tmp/
 /test/version_tmp/

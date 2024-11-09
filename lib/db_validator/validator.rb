@@ -68,10 +68,10 @@ module DbValidator
       return unless options.is_a?(Hash)
 
       DbValidator.configuration.only_models = Array(options[:only_models]) if options[:only_models]
-
       DbValidator.configuration.limit = options[:limit] if options[:limit]
       DbValidator.configuration.batch_size = options[:batch_size] if options[:batch_size]
       DbValidator.configuration.report_format = options[:report_format] if options[:report_format]
+      DbValidator.configuration.show_records = options[:show_records] if options[:show_records]
     end
 
     def find_all_models

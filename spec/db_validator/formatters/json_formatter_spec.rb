@@ -13,12 +13,10 @@ RSpec.describe DbValidator::Formatters::JsonFormatter do
     end
 
     before do
-      # Clean up any existing reports
       FileUtils.rm_rf("db_validator_reports")
     end
 
     after do
-      # Clean up after tests
       FileUtils.rm_rf("db_validator_reports")
     end
 
@@ -36,14 +34,11 @@ RSpec.describe DbValidator::Formatters::JsonFormatter do
       formatter = described_class.new(invalid_records)
       formatter.format
 
-      # Check if reports directory was created
       expect(Dir.exist?("db_validator_reports")).to be true
 
-      # Check if a report file was created
       report_files = Dir["db_validator_reports/validation_report_*.json"]
       expect(report_files).not_to be_empty
 
-      # Verify file content
       file_content = JSON.parse(File.read(report_files.first))
       expect(file_content["Skill"]["error_count"]).to eq(2)
       expect(file_content["User"]["error_count"]).to eq(1)

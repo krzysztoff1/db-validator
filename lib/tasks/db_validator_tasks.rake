@@ -45,16 +45,17 @@ namespace :db_validator do
   desc "Test validation rules on existing records"
   task test: :environment do
     unless ENV["model"] && ENV["rule"]
-      puts "Usage: rake db_validator:test model=user rule='validates :field, presence: true' [show_records=false] [limit=1000]"
+      puts "Usage: rake db_validator:test model=user rule='validates :field, presence: true' [show_records=false] [limit=1000] [format=json]"
       exit 1
     end
 
-    model_name = ENV["model"].classify
+    model_name = ENV.fetch("model").classify
     validation_rule = ENV.fetch("rule", nil)
 
     # Configure options
     DbValidator.configuration.show_records = ENV["show_records"] != "false" if ENV["show_records"].present?
     DbValidator.configuration.limit = ENV["limit"].to_i if ENV["limit"].present?
+    DbValidator.configuration.report_format = ENV["format"].to_sym if ENV["format"].present?
 
     begin
       base_model = model_name.constantize

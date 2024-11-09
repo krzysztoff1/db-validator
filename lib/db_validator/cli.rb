@@ -59,7 +59,7 @@ module DbValidator
       end
     end
 
-    def parse_command_line_args
+    def parse_command_line_args # rubocop:disable Metrics/AbcSize
       args = ARGV.join(" ").split(/\s+/)
       args.each do |arg|
         key, value = arg.split("=")
@@ -70,6 +70,8 @@ module DbValidator
           @options[:limit] = value.to_i
         when "format"
           @options[:report_format] = value.to_sym
+        when "show_records"
+          @options[:show_records] = value.to_sym
         end
       end
     end
@@ -123,6 +125,7 @@ module DbValidator
       config.limit = options[:limit] if options[:limit]
       config.batch_size = options[:batch_size] if options[:batch_size]
       config.report_format = options[:format] if options[:format]
+      config.show_records = options[:show_records] if options[:show_records]
     end
 
     def configure_options
@@ -136,8 +139,6 @@ module DbValidator
       options[:limit] = limit_input if limit_input.present?
 
       options[:format] = @prompt.select("Select report format:", %w[text json], default: "text")
-
-      options[:show_records] = @prompt.yes?("Show failing records in the report?", default: true)
 
       options
     end
