@@ -33,7 +33,7 @@ module DbValidator
 
       def save_to_file(data)
         FileUtils.mkdir_p("db_validator_reports")
-        timestamp = Time.now.strftime("%Y%m%d_%H%M%S")
+        timestamp = Time.zone.now.strftime("%Y%m%d_%H%M%S")
         filename = "db_validator_reports/validation_report_#{timestamp}.json"
 
         File.write(filename, JSON.pretty_generate(data))
