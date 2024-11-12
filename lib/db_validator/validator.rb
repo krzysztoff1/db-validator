@@ -12,7 +12,7 @@ module DbValidator
     end
 
     def validate_all
-      models = get_models_to_validate
+      models = models_to_validate
       invalid_count = 0
 
       models.each do |model|
@@ -140,7 +140,7 @@ module DbValidator
       false
     end
 
-    def get_models_to_validate
+    def models_to_validate
       models = find_all_models
       models.select { |model| should_validate_model?(model) }
     end

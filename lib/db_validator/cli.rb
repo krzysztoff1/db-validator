@@ -100,7 +100,7 @@ module DbValidator
 
       if available_models.empty?
         Rails.logger.debug "No models found in the application."
-        exit 1
+        raise "No models found in the application. Please run this command from your Rails application root."
       end
 
       selected_models = select_models(available_models)
@@ -116,7 +116,7 @@ module DbValidator
       require File.expand_path("config/environment", Dir.pwd)
     rescue LoadError
       Rails.logger.debug "Error: Rails application not found. Please run this command from your Rails application root."
-      exit 1
+      raise "Rails application not found. Please run this command from your Rails application root."
     end
 
     def configure_validator(models = nil, options = {})
