@@ -97,30 +97,45 @@ module DbValidator
     end
 
     def validate_model(model)
-      config = DbValidator.configuration
-      batch_size = config.batch_size || 100
-      limit = config.limit
-
-      scope = model.all
-      scope = scope.limit(limit) if limit
-
+      scope = build_scope(model)
       total_count = scope.count
       return 0 if total_count.zero?
 
+      process_records(scope, model, total_count)
+    end
+
+    def build_scope(model)
+      scope = model.all
+      scope = scope.limit(DbValidator.configuration.limit) if DbValidator.configuration.limit
+      scope
+    end
+
+    def process_records(scope, model, total_count)
       progress_bar = create_progress_bar(model.name, total_count)
+      process_batches(scope, progress_bar, model)
+    end
+
+    def process_batches(scope, progress_bar, model)
       invalid_count = 0
+      batch_size = DbValidator.configuration.batch_size || 100
 
       begin
         scope.find_in_batches(batch_size: batch_size) do |batch|
-          batch.each do |record|
-            invalid_count += 1 unless validate_record(record)
-            progress_bar.increment
-          end
+          invalid_count += process_batch(batch, progress_bar)
         end
       rescue StandardError => e
         Rails.logger.debug { "Error validating #{model.name}: #{e.message}" }
       end
 
+      invalid_count
+    end
+
+    def process_batch(batch, progress_bar)
+      invalid_count = 0
+      batch.each do |record|
+        invalid_count += 1 unless validate_record(record)
+        progress_bar.increment
+      end
       invalid_count
     end
 
