@@ -36,5 +36,8 @@ Style/FrozenStringLiteralComment:
 Rails:
   Enabled: true
 
+Rails/Output:
+  Enabled: false
+
 RSpec:
   Enabled: true

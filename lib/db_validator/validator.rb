@@ -24,13 +24,19 @@ module DbValidator
         Rails.logger.debug "\nValidation passed! All records are valid."
       else
         total_records = models.sum(&:count)
-        is_plural = invalid_count > 1
-        Rails.logger.debug do
-          "\nFound #{invalid_count} invalid #{is_plural ? 'records' : 'record'} out of #{total_records} total #{is_plural ? 'records' : 'record'}."
-        end
+        Rails.logger.debug get_summary(total_records, invalid_count)
       end
 
       @reporter.generate_report
+    end
+
+    def get_summary(records_count, invalid_count)
+      is_plural = invalid_count > 1
+      records_word = is_plural ? "records" : "record"
+      first_part = "\nFound #{invalid_count} invalid #{records_word} out of #{records_count} total #{records_word}."
+      second_part = "\nValidation failed! Some records are invalid." if invalid_count.positive?
+
+      "#{first_part} #{second_part}"
     end
 
     def validate_test_model(model_name)

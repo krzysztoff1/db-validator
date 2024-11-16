@@ -6,6 +6,13 @@ RSpec.describe DbValidator::Reporter do
   let(:reporter) { described_class.new }
 
   describe "#add_invalid_record" do
+    let(:invalid_product) do
+      product = Product.new(name: "", product_type: "unknown")
+      product.save(validate: false)
+      product.valid?
+      product
+    end
+
     before do
       setup_test_table(:products) do |t|
         t.string :name
@@ -17,10 +24,6 @@ RSpec.describe DbValidator::Reporter do
         validates :name, presence: true
         validates :product_type, inclusion: { in: %w[physical digital service] }
       end
-
-      @invalid_product = Product.new(name: "", product_type: "unknown")
-      @invalid_product.save(validate: false)
-      @invalid_product.valid?
     end
 
     after do
@@ -29,15 +32,23 @@ RSpec.describe DbValidator::Reporter do
       ActiveRecord::Base.connection.drop_table(:products)
     end
 
-    it "enhances inclusion errors with allowed values" do
-      reporter.add_invalid_record(@invalid_product)
-      report = reporter.generate_report
-      clean_report = strip_color_codes(report)
+    context "when adding an invalid product" do
+      let(:report) do
+        reporter.add_invalid_record(invalid_product)
+        strip_color_codes(reporter.generate_report)
+      end
 
-      # Update expectations to match the new format
-      expect(clean_report).to include("Product: 1 invalid record")
-      expect(clean_report).to include("⚠️  name can't be blank (actual value: \"\")")
-      expect(clean_report).to include("⚠️  product_type is not included in the list (actual value: \"unknown\")")
+      it "shows the model name and invalid record count" do
+        expect(report).to include("Product: 1 invalid record")
+      end
+
+      it "shows the name validation error" do
+        expect(report).to include("name can't be blank (actual value: \"\")")
+      end
+
+      it "shows the product_type inclusion error" do
+        expect(report).to include("product_type is not included in the list (actual value: \"unknown\")")
+      end
     end
   end
 
@@ -66,17 +77,49 @@ RSpec.describe DbValidator::Reporter do
     end
 
     context "with text format" do
-      it "generates a text report" do
+      before do
+        allow(DbValidator.configuration).to receive(:report_format).and_return(:text)
+      end
+
+      it "shows number of invalid records and models" do
         report = reporter.generate_report
         clean_report = strip_color_codes(report)
 
-        expect(clean_report).to include("Database Validation Report")
+        expect(clean_report).to include("Found 1 invalid record across 1 model")
+      end
+
+      it "shows number of invalid records in a model" do
+        report = reporter.generate_report
+        clean_report = strip_color_codes(report)
+
         expect(clean_report).to include("User: 1 invalid record")
-        expect(clean_report).to include("⚠️  name can't be blank (actual value: \"\")")
+      end
+
+      it "shows error details" do
+        report = reporter.generate_report
+        clean_report = strip_color_codes(report)
+
+        expect(clean_report).to include("name can't be blank (actual value: \"\")")
       end
     end
 
     context "with json format" do
+      let(:invalid_skills) do
+        skills = [
+          Skill.new(name: ""),
+          Skill.new(name: nil),
+          Skill.new(name: "   ")
+        ]
+
+        skills.each do |skill|
+          skill.save(validate: false)
+          skill.valid?
+          reporter.add_invalid_record(skill)
+        end
+
+        skills
+      end
+
       before do
         allow(DbValidator.configuration).to receive(:report_format).and_return(:json)
 
@@ -89,18 +132,7 @@ RSpec.describe DbValidator::Reporter do
           validates :name, presence: true
         end
 
-        # Create multiple invalid skills
-        @invalid_skills = [
-          Skill.new(name: ""),
-          Skill.new(name: nil),
-          Skill.new(name: "   ")
-        ]
-
-        @invalid_skills.each do |skill|
-          skill.save(validate: false)
-          skill.valid?
-          reporter.add_invalid_record(skill)
-        end
+        invalid_skills
       end
 
       after do
@@ -109,21 +141,31 @@ RSpec.describe DbValidator::Reporter do
         ActiveRecord::Base.connection.drop_table(:skills)
       end
 
-      it "generates a JSON report with grouped records and error counts" do
+      it "generates a JSON report with the correct structure" do
         report = reporter.generate_report
         parsed_report = JSON.parse(report)
 
-        expect(parsed_report).to be_a(Hash)
         expect(parsed_report["Skill"]).to be_a(Hash)
-        expect(parsed_report["Skill"]["error_count"]).to eq(3)
-        expect(parsed_report["Skill"]["records"]).to be_an(Array)
-        expect(parsed_report["Skill"]["records"].length).to eq(3)
+      end
 
-        first_record = parsed_report["Skill"]["records"].first
-        expect(first_record).to include(
-          "id" => kind_of(Integer),
-          "errors" => include(match(/name can't be blank/))
-        )
+      it "includes the correct error count" do
+        report = reporter.generate_report
+        parsed_report = JSON.parse(report)
+
+        expect(parsed_report["Skill"]["error_count"]).to eq(3)
+      end
+
+      it "includes an array of records" do
+        report = reporter.generate_report
+        parsed_report = JSON.parse(report)
+
+        expect(parsed_report["Skill"]["records"].length).to eq(3)
+      end
+
+      it "includes the correct record details" do
+        report = JSON.parse(reporter.generate_report)
+        expect(report["Skill"]["records"].first).to include("id" => kind_of(Integer),
+                                                            "errors" => include(match(/name can't be blank/)))
       end
     end
   end
