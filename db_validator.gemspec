@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
 
   spec.metadata = {
     "source_code_uri" => "https://github.com/krzysztoff1/db-validator/",
-    "documentation_uri" => "https://github.com/krzysztoff1/db-validator/blob/main/README.md",
+    "documentation_uri" => "https://github.com/krzysztoff1/db-validator/blob/main/readme.md",
     "changelog_uri" => "https://github.com/krzysztoff1/db-validator/blob/main/changelog.md",
     "rubygems_mfa_required" => "true"
   }

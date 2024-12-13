@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    db_validator (1.0.0)
+    db_validator (1.0.1)
       rails (>= 5.2)
       ruby-progressbar (~> 1.11)
       tty-box (~> 0.7.0)
