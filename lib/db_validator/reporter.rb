@@ -88,32 +88,50 @@ module DbValidator
       report.string
     end
 
-    def generate_record_report(record, index) # rubocop:disable Metrics/AbcSize
+    def generate_record_report(record, index)
       report = StringIO.new
+      record_obj = fetch_record_object(record)
+      info = collect_record_info(record_obj, record, index)
 
-      record_obj = record[:model].constantize.find_by(id: record[:id])
+      report.puts "  #{info.join(', ')}"
+      add_error_messages(report, record[:errors])
+
+      report.string
+    end
+
+    def fetch_record_object(record)
+      record[:model].constantize.find_by(id: record[:id])
+    end
+
+    def collect_record_info(record_obj, record, index)
       info = []
       info << "Record ##{index + 1}"
       info << "ID: #{record[:id]}"
 
-      # Add timestamps if available
+      add_timestamp_info(info, record_obj)
+      add_identifying_fields(info, record_obj)
+
+      info
+    end
+
+    def add_timestamp_info(info, record_obj)
       if record_obj.respond_to?(:created_at)
         info << "Created: #{record_obj.created_at.strftime('%b %d, %Y at %I:%M %p')}"
       end
-      if record_obj.respond_to?(:updated_at)
-        info << "Updated: #{record_obj.updated_at.strftime('%b %d, %Y at %I:%M %p')}"
-      end
+      return unless record_obj.respond_to?(:updated_at)
 
-      # Add identifying fields if available
+      info << "Updated: #{record_obj.updated_at.strftime('%b %d, %Y at %I:%M %p')}"
+    end
+
+    def add_identifying_fields(info, record_obj)
       info << "Name: #{record_obj.name}" if record_obj.respond_to?(:name) && record_obj.name.present?
       info << "Title: #{record_obj.title}" if record_obj.respond_to?(:title) && record_obj.title.present?
+    end
 
-      report.puts "  #{info.join(', ')}"
-      record[:errors].each do |error|
+    def add_error_messages(report, errors)
+      errors.each do |error|
         report.puts "    \e[31m- #{error}\e[0m"
       end
-
-      report.string
     end
 
     def print_title
